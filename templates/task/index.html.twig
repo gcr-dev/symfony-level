@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des tâches{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1>Liste des tâches</h1>
+
+        <div class="mb-4 mt-3">
+            <div class="btn-group" role="group">
+                <a href="{{ path('app_task_index') }}" class="btn {{ currentStatus is null ? 'btn-primary' : 'btn-outline-primary' }}">Toutes</a>
+                <a href="{{ path('app_task_index', {'status': 'todo'}) }}" class="btn {{ currentStatus == 'todo' ? 'btn-primary' : 'btn-outline-primary' }}">À faire</a>
+                <a href="{{ path('app_task_index', {'status': 'in_progress'}) }}" class="btn {{ currentStatus == 'in_progress' ? 'btn-primary' : 'btn-outline-primary' }}">En cours</a>
+                <a href="{{ path('app_task_index', {'status': 'done'}) }}" class="btn {{ currentStatus == 'done' ? 'btn-primary' : 'btn-outline-primary' }}">Terminées</a>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_USER') %}
+            <div class="mb-4">
+                <a href="{{ path('app_task_new') }}" class="btn btn-success">Créer une nouvelle tâche</a>
+            </div>
+        {% endif %}
+
+        {% if tasks|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Statut</th>
+                            <th>Date de création</th>
+                            <th>Utilisateur</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.id }}</td>
+                            <td>{{ task.title }}</td>
+                            <td>
+                                {% if task.status == 'todo' %}
+                                    <span class="badge bg-warning">À faire</span>
+                                {% elseif task.status == 'in_progress' %}
+                                    <span class="badge bg-info">En cours</span>
+                                {% elseif task.status == 'done' %}
+                                    <span class="badge bg-success">Terminée</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.createdAt|date('d/m/Y H:i') }}</td>
+                            <td>{{ task.user.email }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ path('app_task_show', {'id': task.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                                    {% if is_granted('ROLE_USER') and (app.user == task.user or is_granted('ROLE_ADMIN')) %}
+                                        <a href="{{ path('app_task_edit', {'id': task.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Aucune tâche trouvée.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

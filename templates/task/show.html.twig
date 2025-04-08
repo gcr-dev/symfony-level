@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la tâche{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1>Détails de la tâche</h1>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title">{{ task.title }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Statut: </strong>
+                    {% if task.status == 'todo' %}
+                        <span class="badge bg-warning">À faire</span>
+                    {% elseif task.status == 'in_progress' %}
+                        <span class="badge bg-info">En cours</span>
+                    {% elseif task.status == 'done' %}
+                        <span class="badge bg-success">Terminée</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Description: </strong>
+                    {% if task.description %}
+                        <p>{{ task.description }}</p>
+                    {% else %}
+                        <p class="text-muted">Aucune description</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Créée le: </strong>
+                    <p>{{ task.createdAt|date('d/m/Y H:i') }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Utilisateur: </strong>
+                    <p>{{ task.user.email }}</p>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group" role="group">
+                    <a href="{{ path('app_task_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                    
+                    {% if is_granted('ROLE_USER') and (app.user == task.user or is_granted('ROLE_ADMIN')) %}
+                        <a href="{{ path('app_task_edit', {'id': task.id}) }}" class="btn btn-primary">Modifier</a>
+                        
+                        <form method="post" action="{{ path('app_task_delete', {'id': task.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche?');" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.id) }}">
+                            <button class="btn btn-danger">Supprimer</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
